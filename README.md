@@ -52,6 +52,24 @@ Skill 不依赖 Obsidian API。它只读写 Markdown 文件。
 2. 初始化时把这个目录路径交给 `$task-manager`。
 3. Codex 负责维护 Markdown，Obsidian 负责查看和手动编辑。
 
+## 本地保存行为
+
+从 `v0.1.1` 开始，整理任务后默认会保存到初始化时设置的本地 Markdown 目录，而不是只在对话里输出。
+
+默认规则：
+
+- 用户明确说“只预览”“不保存”时，不写入本地。
+- 其他任务整理、每日整理、周复盘场景默认保存。
+- 写入前会把被修改文件备份到任务目录下的 `.task-manager-backups/`。
+- 写入只更新 `<!-- task-manager:start ... -->` 和 `<!-- task-manager:end ... -->` 之间的受管理区块。
+- 旧模板没有受管理区块时，保存脚本会按标题和表格位置自动补上标记。
+
+保存脚本：
+
+```text
+scripts/task_manager_store.py apply --input-json <update.json>
+```
+
 ## 文件结构
 
 初始化模板会创建：
@@ -64,7 +82,8 @@ Skill 不依赖 Obsidian API。它只读写 Markdown 文件。
 
 已有文件不会被覆盖。
 
+核心表格会包含 `task-manager` 受管理标记，方便脚本稳定更新。
+
 ## License
 
 MIT
-

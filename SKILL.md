@@ -50,7 +50,34 @@ After initialization:
    - Brain dump: collect unstructured thoughts first.
    - Daily planning: choose 1-3 realistic current priorities.
    - Weekly review: update projects, waiting items, and this week's focus.
-5. Update Markdown task files only after the user provides enough task detail.
+5. Persist the organized result to local Markdown files unless the user explicitly says "只预览", "不保存", or asks for a dry run.
+6. Report the changed local files after persistence completes.
+
+## Persistence requirement
+
+Task organization must not stop at chat output. After the user provides enough task detail, produce a complete update JSON and run:
+
+```bash
+python scripts/task_manager_store.py apply --input-json "<path-to-update-json>"
+```
+
+The JSON must include every top-level key, even when a section is empty:
+
+```json
+{
+  "today_focus": [],
+  "week_focus": [],
+  "inbox": [],
+  "project_actions": [],
+  "waiting": [],
+  "blocked": [],
+  "needs_info": []
+}
+```
+
+Default behavior is to save. Only skip persistence when the user explicitly requests preview-only behavior. When persistence succeeds, show the changed file list returned by the script. When persistence fails, state clearly that local Markdown was not updated and keep the JSON available so the user can retry.
+
+For temporary update JSON files, use a local temporary path outside the skill repository when possible. Do not store task content in the published skill files.
 
 ## Task fields
 
@@ -77,7 +104,7 @@ Default priority is `截止期 + 影响`, adjusted by execution cost:
 
 ## Output format
 
-End task-management sessions with:
+End task-management sessions with the saved summary and persistence result:
 
 ```markdown
 ## 今日/当前重点
@@ -98,10 +125,15 @@ End task-management sessions with:
 ## 需要补充的信息
 
 - 
+
+## 本地保存
+
+- 状态：已保存 / 未保存
+- 已修改文件：
+- 备份位置：
 ```
 
 ## References
 
 - Read `references/workflow.md` for detailed conversation flows.
 - Read `references/templates.md` when creating or repairing task Markdown files manually.
-

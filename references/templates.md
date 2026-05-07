@@ -17,18 +17,24 @@ type: task-dashboard
 
 原则：只保留 1-3 件今天现实上能推进的事。
 
+<!-- task-manager:start today_focus -->
 | 任务 | 状态 | 截止期 | 影响 | 成本 | 下一步动作 | 所属项目 | 备注 |
 |---|---|---|---|---|---|---|---|
+<!-- task-manager:end today_focus -->
 
 ## 本周推进
 
+<!-- task-manager:start week_focus -->
 | 任务 | 状态 | 截止期 | 影响 | 成本 | 下一步动作 | 所属项目 | 备注 |
 |---|---|---|---|---|---|---|---|
+<!-- task-manager:end week_focus -->
 
 ## 待澄清
 
+<!-- task-manager:start inbox -->
 | 任务 | 状态 | 截止期 | 影响 | 成本 | 下一步动作 | 所属项目 | 备注 |
 |---|---|---|---|---|---|---|---|
+<!-- task-manager:end inbox -->
 ```
 
 ## 01_收集箱.md
@@ -48,8 +54,10 @@ type: task-inbox
 
 ## 待整理表
 
+<!-- task-manager:start inbox -->
 | 任务 | 状态 | 截止期 | 影响 | 成本 | 下一步动作 | 所属项目 | 备注 |
 |---|---|---|---|---|---|---|---|
+<!-- task-manager:end inbox -->
 ```
 
 ## 02_项目清单.md
@@ -70,8 +78,10 @@ type: project-list
 
 ## 本周要推进的项目动作
 
+<!-- task-manager:start project_actions -->
 | 任务 | 状态 | 截止期 | 影响 | 成本 | 下一步动作 | 所属项目 | 备注 |
 |---|---|---|---|---|---|---|---|
+<!-- task-manager:end project_actions -->
 
 ## 暂缓项目
 
@@ -92,18 +102,24 @@ type: waiting-and-blockers
 
 ## 等待他人或外部条件
 
+<!-- task-manager:start waiting -->
 | 任务 | 状态 | 截止期 | 影响 | 等待对象/条件 | 下一次检查 | 所属项目 | 备注 |
 |---|---|---|---|---|---|---|---|
+<!-- task-manager:end waiting -->
 
 ## 需要我补充信息
 
+<!-- task-manager:start needs_info -->
 | 任务 | 状态 | 缺什么信息 | 截止期 | 影响 | 下一步动作 | 所属项目 | 备注 |
 |---|---|---|---|---|---|---|---|
+<!-- task-manager:end needs_info -->
 
 ## 卡住的任务
 
+<!-- task-manager:start blocked -->
 | 任务 | 状态 | 卡住原因 | 截止期 | 影响 | 可尝试的最小动作 | 所属项目 | 备注 |
 |---|---|---|---|---|---|---|---|
+<!-- task-manager:end blocked -->
 ```
 
 ## 04_固定提示词.md
@@ -126,4 +142,3 @@ type: task-management-prompt
 5. 对复杂任务，只拆到“下一步可以立刻做什么”，不要过度规划。
 ```
 ```
-
