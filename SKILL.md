@@ -11,6 +11,22 @@ This skill manages a local, Obsidian-compatible Markdown task system. It is desi
 
 Do not assume or invent a task directory. On first use, initialize the skill before reading or writing task files.
 
+Task Markdown persistence is script-only. The only allowed way to write organized task data into the user's task directory is:
+
+```bash
+python scripts/task_manager_store.py apply --input-json "<path-to-update-json>"
+```
+
+Do not directly edit, rewrite, append to, or manually repair the user's task Markdown files:
+
+- `00_任务总览.md`
+- `01_收集箱.md`
+- `02_项目清单.md`
+- `03_等待与阻塞.md`
+- `04_固定提示词.md`
+
+If persistence fails because of garbled filenames, encoding, path handling, permissions, schema validation, or any script bug, stop and fix the script or the update JSON. Do not bypass the script by writing Markdown directly.
+
 Local configuration is stored outside this skill at:
 
 ```text
@@ -61,6 +77,8 @@ Task organization must not stop at chat output. After the user provides enough t
 python scripts/task_manager_store.py apply --input-json "<path-to-update-json>"
 ```
 
+This command is mandatory for local writes. Never use direct file editing tools, ad hoc shell writes, or manual Markdown edits to persist organized task data in the configured task directory.
+
 The JSON must include every top-level key, even when a section is empty:
 
 ```json
@@ -75,7 +93,9 @@ The JSON must include every top-level key, even when a section is empty:
 }
 ```
 
-Default behavior is to save. Only skip persistence when the user explicitly requests preview-only behavior. When persistence succeeds, show the changed file list returned by the script. When persistence fails, state clearly that local Markdown was not updated and keep the JSON available so the user can retry.
+Default behavior is to save. Only skip persistence when the user explicitly requests preview-only behavior. When persistence succeeds, show the exact `changed_files` and `backups` returned by the script. Do not summarize this as only "已落到本地".
+
+When persistence fails, state clearly that local Markdown was not updated, include the failure reason, and keep the JSON available so the user can retry. If the failure is caused by the script, fix the script and rerun it; do not manually edit task Markdown as a fallback.
 
 For temporary update JSON files, use a local temporary path outside the skill repository when possible. Do not store task content in the published skill files.
 
