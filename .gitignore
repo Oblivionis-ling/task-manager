@@ -1,0 +1,12 @@
+*.zip
+*.tmp
+.tmp/
+__pycache__/
+.pytest_cache/
+.DS_Store
+Thumbs.db
+
+# Local task-manager runtime data
+.codex-task-manager/
+config.json
+
