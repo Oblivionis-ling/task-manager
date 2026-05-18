@@ -14,6 +14,35 @@ The current `main` branch is agent-only. It no longer installs as a Codex Skill 
 
 ## Run Locally
 
+Recommended:
+
+```powershell
+.\start-agent.cmd
+```
+
+Then open the URL printed by the script, usually:
+
+```text
+http://127.0.0.1:8787
+```
+
+To stop the agent:
+
+```powershell
+.\stop-agent.cmd
+```
+
+The `.cmd` wrappers run PowerShell with `ExecutionPolicy Bypass`, which avoids common local script policy issues on Windows.
+
+You can also run the PowerShell scripts directly:
+
+```powershell
+.\start-agent.ps1
+.\stop-agent.ps1
+```
+
+Low-level manual start:
+
 ```powershell
 node server.js
 ```
@@ -40,8 +69,7 @@ By default, data is stored inside the repository working directory:
 To store data elsewhere:
 
 ```powershell
-$env:TASK_MANAGER_DATA_DIR="D:\task-manager-data"
-node server.js
+.\start-agent.cmd -DataDir "D:\task-manager-data"
 ```
 
 The server writes the store through a temporary file and rename flow. Before each update, it copies the previous `store.json` into `backups/`.
@@ -65,6 +93,10 @@ API keys are not written to `store.json`. Provider settings entered in the brows
 
 ```text
 server.js
+start-agent.ps1
+stop-agent.ps1
+start-agent.cmd
+stop-agent.cmd
 public/
   index.html
   styles.css
