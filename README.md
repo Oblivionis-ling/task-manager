@@ -86,6 +86,24 @@ scripts/task_manager_store.py apply --input-json <update.json>
 
 核心表格会包含 `task-manager` 受管理标记，方便脚本稳定更新。
 
+## Agent UI
+
+本仓库包含一个本地 Web Agent，位置在 `agent/`。它提供一个 Liquid Glass-inspired 界面，并通过 OpenAI-compatible API 调用模型生成任务 JSON。
+
+运行：
+
+```text
+node agent/server.js
+```
+
+默认打开：
+
+```text
+http://127.0.0.1:8787
+```
+
+预置 DeepSeek V4 Flash / Pro，也可以配置 OpenRouter 或任意兼容 `/chat/completions` 的供应商。无论使用哪个模型，保存任务时仍只调用 `scripts/task_manager_store.py apply`。
+
 ## License
 
 MIT
