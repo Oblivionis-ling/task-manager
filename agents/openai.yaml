@@ -1,8 +1,0 @@
-interface:
-  display_name: "Task Manager"
-  short_description: "Obsidian Markdown 任务管理 Skill"
-  default_prompt: "Use $task-manager to initialize or manage an Obsidian-compatible task system."
-
-policy:
-  allow_implicit_invocation: true
-

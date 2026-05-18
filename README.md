@@ -1,108 +1,94 @@
 # task-manager
 
-`task-manager` 是一个 Codex Skill，用来初始化和维护 Obsidian 兼容的 Markdown 任务管理系统。
+`task-manager` 现在是一个本地 Web Agent，用来整理任务并维护 Obsidian 兼容的 Markdown 任务系统。
 
-它适合这些场景：
+当前 `main` 分支只保留 agent 应用和本地持久化脚本。旧版 Codex Skill 已从主分支删除，但历史 Skill 包仍保留在 GitHub Releases，可以继续查看和下载。
 
-- 脑子里事情很多，需要先清空再整理。
-- 想把任务拆成今日重点、本周推进、项目、等待与阻塞。
-- 想让 Codex 持续维护一套本地 Markdown 任务文件。
-- 想在 Obsidian 中直接查看和编辑任务系统。
+## 功能
 
-## 安装
+- 把混乱的想法整理成结构化任务。
+- 输出今日重点、本周推进、项目动作、等待项、阻塞项和需要补充的信息。
+- 通过 `scripts/task_manager_store.py` 把结果保存到本地 Markdown。
+- 提供 iOS / Liquid Glass 风格的本地网页界面。
+- 预留 OpenAI-compatible `/chat/completions` 接口，可切换 DeepSeek、OpenRouter 或其他兼容供应商。
 
-把本仓库复制到 Codex skills 目录下，并保持目录名为 `task-manager`。
+## 本地运行
 
-```text
-<codex-home>/skills/task-manager
+在仓库根目录运行：
+
+```powershell
+node server.js
 ```
 
-安装后，在新对话中使用：
-
-```text
-用 $task-manager 初始化任务系统
-```
-
-## 初始化
-
-第一次调用时，Skill 不会猜测任务目录。你需要明确提供：
-
-1. 任务 Markdown 文件存放目录。
-2. 是否创建缺失模板文件。
-3. 触发方式：
-   - 仅通过 `$task-manager` 调用。
-   - 使用内置触发语，例如“我脑子乱了”“帮我整理任务”“做一次复盘”。
-   - 使用自定义触发语。
-
-本地配置保存在：
-
-```text
-~/.codex/task-manager/config.json
-```
-
-这个配置文件不属于仓库，也不应该提交。
-
-## Obsidian 连接方式
-
-Skill 不依赖 Obsidian API。它只读写 Markdown 文件。
-
-推荐做法：
-
-1. 在 Obsidian vault 中新建一个任务目录。
-2. 初始化时把这个目录路径交给 `$task-manager`。
-3. Codex 负责维护 Markdown，Obsidian 负责查看和手动编辑。
-
-## 本地保存行为
-
-从 `v0.1.1` 开始，整理任务后默认会保存到初始化时设置的本地 Markdown 目录，而不是只在对话里输出。
-
-默认规则：
-
-- 用户明确说“只预览”“不保存”时，不写入本地。
-- 其他任务整理、每日整理、周复盘场景默认保存。
-- 写入前会把被修改文件备份到任务目录下的 `.task-manager-backups/`。
-- 写入只更新 `<!-- task-manager:start ... -->` 和 `<!-- task-manager:end ... -->` 之间的受管理区块。
-- 旧模板没有受管理区块时，保存脚本会按标题和表格位置自动补上标记。
-
-从 `v0.1.2` 开始，脚本是唯一允许的写入路径。Codex 不应该直接编辑、重写或追加用户任务目录中的 Markdown 文件。如果出现乱码、编码、路径、权限或 schema 问题，应修复脚本或输入 JSON 后重新运行脚本，而不是手动绕过。
-
-保存脚本：
-
-```text
-scripts/task_manager_store.py apply --input-json <update.json>
-```
-
-## 文件结构
-
-初始化模板会创建：
-
-- `00_任务总览.md`
-- `01_收集箱.md`
-- `02_项目清单.md`
-- `03_等待与阻塞.md`
-- `04_固定提示词.md`
-
-已有文件不会被覆盖。
-
-核心表格会包含 `task-manager` 受管理标记，方便脚本稳定更新。
-
-## Agent UI
-
-本仓库包含一个本地 Web Agent，位置在 `agent/`。它提供一个 Liquid Glass-inspired 界面，并通过 OpenAI-compatible API 调用模型生成任务 JSON。
-
-运行：
-
-```text
-node agent/server.js
-```
-
-默认打开：
+然后打开：
 
 ```text
 http://127.0.0.1:8787
 ```
 
-预置 DeepSeek V4 Flash / Pro，也可以配置 OpenRouter 或任意兼容 `/chat/completions` 的供应商。无论使用哪个模型，保存任务时仍只调用 `scripts/task_manager_store.py apply`。
+如果普通终端里没有 `node`，需要先安装 Node.js LTS，或在已经提供 Node 的运行环境中启动。
+
+## 模型供应商
+
+界面内置 DeepSeek 和 OpenRouter 预设，也支持自定义 OpenAI-compatible provider。
+
+API key 不会提交到仓库。通过网页界面填写的 provider 设置会保存在浏览器 `localStorage`。服务端也可以按配置读取环境变量中的 key。
+
+## 本地保存
+
+所有任务 Markdown 写入都必须走脚本：
+
+```powershell
+python scripts/task_manager_store.py apply --input-json <update.json>
+```
+
+Agent 不直接重写用户任务 Markdown 文件。保存脚本会读取已初始化的任务目录，只更新受管理区块，并在修改前创建备份。
+
+更新 JSON 结构如下：
+
+```json
+{
+  "today_focus": [],
+  "week_focus": [],
+  "inbox": [],
+  "project_actions": [],
+  "waiting": [],
+  "blocked": [],
+  "needs_info": []
+}
+```
+
+## 初始化任务目录
+
+首次使用前可以运行：
+
+```powershell
+python scripts/init_task_manager.py
+```
+
+初始化脚本会保存本机配置，并可按需创建 Obsidian 兼容的 Markdown 模板文件。
+
+## 仓库结构
+
+```text
+server.js
+public/
+  index.html
+  styles.css
+  app.js
+scripts/
+  init_task_manager.py
+  task_manager_store.py
+```
+
+## 历史 Codex Skill 版本
+
+Codex Skill 已不在当前 `main` 分支中维护，但历史版本仍可下载：
+
+- [v0.2.0](https://github.com/Oblivionis-ling/task-manager/releases/tag/v0.2.0)
+- [v0.1.2](https://github.com/Oblivionis-ling/task-manager/releases/tag/v0.1.2)
+- [v0.1.1](https://github.com/Oblivionis-ling/task-manager/releases/tag/v0.1.1)
+- [v0.1.0](https://github.com/Oblivionis-ling/task-manager/releases/tag/v0.1.0)
 
 ## License
 

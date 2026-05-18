@@ -8,7 +8,7 @@ const os = require("node:os");
 const path = require("node:path");
 const { spawn, spawnSync } = require("node:child_process");
 
-const repoRoot = path.resolve(__dirname, "..");
+const repoRoot = __dirname;
 const publicRoot = path.join(__dirname, "public");
 const configPath = path.join(os.homedir(), ".codex", "task-manager", "config.json");
 const initScript = path.join(repoRoot, "scripts", "init_task_manager.py");
