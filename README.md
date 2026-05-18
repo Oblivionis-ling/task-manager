@@ -1,74 +1,67 @@
 # task-manager
 
-`task-manager` 现在是一个本地 Web Agent，用来整理任务并维护 Obsidian 兼容的 Markdown 任务系统。
+`task-manager` is a local Web Agent for turning messy thoughts into a practical task workbench.
 
-当前 `main` 分支只保留 agent 应用和本地持久化脚本。旧版 Codex Skill 已从主分支删除，但历史 Skill 包仍保留在 GitHub Releases，可以继续查看和下载。
+The current `main` branch is agent-only. It no longer installs as a Codex Skill and no longer writes Obsidian Markdown. Older Codex Skill and Markdown-based versions are still available from GitHub Releases.
 
-## 功能
+## What It Does
 
-- 把混乱的想法整理成结构化任务。
-- 输出今日重点、本周推进、项目动作、等待项、阻塞项和需要补充的信息。
-- 通过 `scripts/task_manager_store.py` 把结果保存到本地 Markdown。
-- 提供 iOS / Liquid Glass 风格的本地网页界面。
-- 预留 OpenAI-compatible `/chat/completions` 接口，可切换 DeepSeek、OpenRouter 或其他兼容供应商。
+- Shows the most important actions for today on the first screen.
+- Converts a brain dump into editable task drafts through an OpenAI-compatible model API.
+- Saves confirmed tasks into a local JSON store under the project directory.
+- Supports manual task creation, editing, and completion.
+- Keeps recent history and store backups for recovery.
 
-## 本地运行
-
-在仓库根目录运行：
+## Run Locally
 
 ```powershell
 node server.js
 ```
 
-然后打开：
+Then open:
 
 ```text
 http://127.0.0.1:8787
 ```
 
-如果普通终端里没有 `node`，需要先安装 Node.js LTS，或在已经提供 Node 的运行环境中启动。
+If the default port is busy, the server automatically tries the next available port up to `8899`.
 
-## 模型供应商
+## Data Storage
 
-界面内置 DeepSeek 和 OpenRouter 预设，也支持自定义 OpenAI-compatible provider。
+By default, data is stored inside the repository working directory:
 
-API key 不会提交到仓库。通过网页界面填写的 provider 设置会保存在浏览器 `localStorage`。服务端也可以按配置读取环境变量中的 key。
+```text
+.task-manager-data/store.json
+.task-manager-data/backups/
+```
 
-## 本地保存
+`.task-manager-data/` is ignored by git and should not be committed.
 
-所有任务 Markdown 写入都必须走脚本：
+To store data elsewhere:
 
 ```powershell
-python scripts/task_manager_store.py apply --input-json <update.json>
+$env:TASK_MANAGER_DATA_DIR="D:\task-manager-data"
+node server.js
 ```
 
-Agent 不直接重写用户任务 Markdown 文件。保存脚本会读取已初始化的任务目录，只更新受管理区块，并在修改前创建备份。
+The server writes the store through a temporary file and rename flow. Before each update, it copies the previous `store.json` into `backups/`.
 
-更新 JSON 结构如下：
+## Model Provider
 
-```json
-{
-  "today_focus": [],
-  "week_focus": [],
-  "inbox": [],
-  "project_actions": [],
-  "waiting": [],
-  "blocked": [],
-  "needs_info": []
-}
-```
+The UI includes DeepSeek and OpenRouter presets, plus a custom OpenAI-compatible provider option.
 
-## 初始化任务目录
+API keys are not written to `store.json`. Provider settings entered in the browser are saved in browser `localStorage`; the server can also use provider key environment variables such as `DEEPSEEK_API_KEY` or `OPENROUTER_API_KEY`.
 
-首次使用前可以运行：
+## API
 
-```powershell
-python scripts/init_task_manager.py
-```
+- `GET /api/state`: returns tasks, today focus, drafts, history, settings, and data paths.
+- `POST /api/drafts`: sends the brain dump to the configured model and creates an editable draft.
+- `POST /api/drafts/:id/commit`: commits edited draft tasks into the local store.
+- `POST /api/tasks`: creates a manual task.
+- `PATCH /api/tasks/:id`: updates a task.
+- `POST /api/tasks/:id/complete`: marks a task complete.
 
-初始化脚本会保存本机配置，并可按需创建 Obsidian 兼容的 Markdown 模板文件。
-
-## 仓库结构
+## Repository Layout
 
 ```text
 server.js
@@ -76,15 +69,13 @@ public/
   index.html
   styles.css
   app.js
-scripts/
-  init_task_manager.py
-  task_manager_store.py
 ```
 
-## 历史 Codex Skill 版本
+## Historical Codex Skill Releases
 
-Codex Skill 已不在当前 `main` 分支中维护，但历史版本仍可下载：
+The old Skill/Markdown versions are no longer on `main`, but remain downloadable:
 
+- [v0.3.0](https://github.com/Oblivionis-ling/task-manager/releases/tag/v0.3.0)
 - [v0.2.0](https://github.com/Oblivionis-ling/task-manager/releases/tag/v0.2.0)
 - [v0.1.2](https://github.com/Oblivionis-ling/task-manager/releases/tag/v0.1.2)
 - [v0.1.1](https://github.com/Oblivionis-ling/task-manager/releases/tag/v0.1.1)

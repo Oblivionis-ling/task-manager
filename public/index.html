@@ -7,100 +7,110 @@
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
-    <main class="shell">
-      <section class="topbar" aria-label="Agent status">
+    <main class="app-shell">
+      <header class="topbar">
         <div>
           <p class="eyebrow">Task Manager Agent</p>
-          <h1>整理，落盘，复盘</h1>
+          <h1>今天该干什么</h1>
         </div>
-        <div class="status-pill" id="statusPill">检查配置中</div>
+        <div class="top-actions">
+          <span id="statusPill" class="status-pill">读取本地数据</span>
+          <button id="refreshButton" class="icon-button" title="刷新" aria-label="刷新">↻</button>
+        </div>
+      </header>
+
+      <section class="today-panel" aria-label="今日重点">
+        <div class="section-head">
+          <div>
+            <h2>今日行动</h2>
+            <p id="dataPathText">数据文件：检查中</p>
+          </div>
+          <div id="statsStrip" class="stats-strip"></div>
+        </div>
+        <div id="todayList" class="today-list"></div>
       </section>
 
-      <section class="workspace">
-        <aside class="panel config-panel">
-          <div class="panel-head">
-            <h2>运行设置</h2>
-            <button class="icon-button" id="refreshButton" title="刷新配置" aria-label="刷新配置">↻</button>
-          </div>
-
-          <label class="field">
-            <span>模型通道</span>
-            <select id="providerSelect"></select>
-          </label>
-
-          <label class="field">
-            <span>Base URL</span>
-            <input id="baseUrlInput" autocomplete="off" placeholder="https://api.deepseek.com" />
-          </label>
-
-          <label class="field">
-            <span>Model</span>
-            <input id="modelInput" autocomplete="off" placeholder="deepseek-v4-flash" />
-          </label>
-
-          <label class="field">
-            <span>API Key</span>
-            <input id="apiKeyInput" type="password" autocomplete="off" placeholder="只保存在浏览器本地" />
-          </label>
-
-          <div class="switch-row">
-            <label class="switch">
-              <input id="persistToggle" type="checkbox" checked />
-              <span></span>
-            </label>
-            <div>
-              <strong>保存到本地 Markdown</strong>
-              <p>开启后后端会调用 <code>task_manager_store.py</code>。</p>
+      <section class="main-grid">
+        <section class="panel compose-panel">
+          <div class="section-head">
+            <h2>脑内清空</h2>
+            <div class="mode-tabs" role="tablist" aria-label="整理模式">
+              <button class="tab active" data-mode="organize">整理</button>
+              <button class="tab" data-mode="daily">每日</button>
+              <button class="tab" data-mode="weekly">周复盘</button>
             </div>
           </div>
 
-          <details class="init-box">
-            <summary>初始化任务目录</summary>
-            <label class="field">
-              <span>任务目录路径</span>
-              <input id="taskRootInput" autocomplete="off" placeholder="选择你的 Obsidian 任务目录" />
-            </label>
-            <label class="field">
-              <span>触发模式</span>
-              <select id="triggerModeInput">
-                <option value="built-in">内置触发语</option>
-                <option value="explicit-only">只用 $task-manager</option>
-                <option value="custom">自定义触发语</option>
-              </select>
-            </label>
-            <button class="primary" id="initButton">初始化 / 更新配置</button>
-          </details>
-        </aside>
-
-        <section class="panel compose-panel">
-          <div class="mode-tabs" role="tablist" aria-label="整理模式">
-            <button class="tab active" data-mode="organize">整理</button>
-            <button class="tab" data-mode="daily">每日</button>
-            <button class="tab" data-mode="weekly">周复盘</button>
-          </div>
-
-          <label class="field prompt-field">
-            <span>把脑子里的事倒在这里</span>
-            <textarea id="inputText" rows="12" placeholder="不用排序，直接写：作业、论文、账单、想学的东西、卡住的事、担心的 deadline..."></textarea>
+          <label class="field">
+            <span>先乱写，不用排序</span>
+            <textarea id="inputText" rows="10" placeholder="例：论文要定范围，矩阵分析作业快截止，账单没处理，B站总结先别放今天..."></textarea>
           </label>
 
           <div class="action-row">
-            <button class="primary run" id="runButton">运行 Agent</button>
+            <button class="primary" id="draftButton">生成草稿</button>
             <button class="secondary" id="sampleButton">填入示例</button>
           </div>
+
+          <details class="settings-box">
+            <summary>模型设置</summary>
+            <label class="field">
+              <span>模型通道</span>
+              <select id="providerSelect"></select>
+            </label>
+            <label class="field">
+              <span>Base URL</span>
+              <input id="baseUrlInput" autocomplete="off" placeholder="https://api.deepseek.com" />
+            </label>
+            <label class="field">
+              <span>Model</span>
+              <input id="modelInput" autocomplete="off" placeholder="deepseek-v4-flash" />
+            </label>
+            <label class="field">
+              <span>API Key</span>
+              <input id="apiKeyInput" type="password" autocomplete="off" placeholder="只保存在浏览器本地" />
+            </label>
+          </details>
         </section>
 
-        <section class="panel result-panel">
-          <div class="panel-head">
-            <h2>结果</h2>
-            <span id="modelBadge" class="badge">未运行</span>
+        <section class="panel draft-panel">
+          <div class="section-head">
+            <h2>整理草稿</h2>
+            <span id="modelBadge" class="badge">未生成</span>
           </div>
-          <div id="resultSummary" class="summary-grid"></div>
-          <pre id="jsonOutput" class="json-output">{}</pre>
+          <div id="draftEmpty" class="empty-state">AI 生成的任务会先出现在这里，确认后才进入任务库。</div>
+          <div id="draftList" class="draft-list"></div>
+          <div class="action-row draft-actions">
+            <button class="primary" id="commitDraftButton" disabled>确认入库</button>
+            <button class="secondary" id="clearDraftButton" disabled>清空草稿</button>
+          </div>
         </section>
+      </section>
+
+      <section class="main-grid lower-grid">
+        <section class="panel tasks-panel">
+          <div class="section-head">
+            <h2>任务库</h2>
+            <form id="quickAddForm" class="quick-add">
+              <input id="quickTitleInput" autocomplete="off" placeholder="快速新增任务" />
+              <button class="secondary" type="submit">添加</button>
+            </form>
+          </div>
+          <div id="taskSections" class="task-sections"></div>
+        </section>
+
+        <aside class="panel history-panel">
+          <div class="section-head">
+            <h2>最近记录</h2>
+            <span id="updatedAtBadge" class="badge">未保存</span>
+          </div>
+          <div id="historyList" class="history-list"></div>
+          <details class="debug-box">
+            <summary>调试 JSON</summary>
+            <pre id="jsonOutput" class="json-output">{}</pre>
+          </details>
+        </aside>
       </section>
     </main>
     <script src="/app.js"></script>
   </body>
 </html>
-

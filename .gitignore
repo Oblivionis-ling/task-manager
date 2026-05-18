@@ -7,6 +7,4 @@ __pycache__/
 Thumbs.db
 
 # Local task-manager runtime data
-.codex-task-manager/
-config.json
-
+.task-manager-data/
